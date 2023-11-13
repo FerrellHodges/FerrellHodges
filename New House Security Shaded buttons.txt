@@ -1,0 +1,422 @@
+// Load Wi-Fi library
+#define WiFiTimer
+#include <WiFi.h>
+#include <WiFiClient.h>
+// Replace with your network credentials
+const char* ssid = "XXXXXXXXXX";
+const char* password = "XXXXXXXXXX";
+
+// Set web server port number to 84
+WiFiServer server(7580);
+// Variable to store the HTTP request
+String header;
+// Auxiliar variables to store the current output state
+String output4State = "off";
+String output26State = "off";
+String output27State = "off";
+String output32State = "off";
+String output33State = "off";
+String output25State = "off";
+String output13State = "off";
+String output19State = "off";
+String output16State = "off";
+String output17State = "off";
+String output18State = "off";
+String output21State = "off";
+String output23State = "off";
+
+// Assign output variables to GPIO pins
+const int output23 = 23;
+const int output21 = 21;
+const int output4 = 4;
+const int output27 = 27;
+const int output26 = 26;
+const int output33 = 33;
+const int output32 = 32;
+const int output25 = 25;
+const int output13 = 13;
+const int output19 = 19;
+const int output16 = 16;
+const int output17 = 17;
+const int output18 = 18;
+const int output14 = 14;
+const int output22 = 22;
+// Current time
+unsigned long currentTime = millis();
+// Previous time
+unsigned long previousTime = 0;
+// Define timeout time in milliseconds (example: 2000ms = 2s)
+const long timeoutTime = 2000;
+
+void setup() {
+  Serial.begin(115200);
+  // Initialize the output variables as outputs
+  pinMode(output23, OUTPUT);
+  pinMode(output4, OUTPUT);
+  pinMode(output27, OUTPUT);
+  pinMode(output26, OUTPUT);
+  pinMode(output33, OUTPUT);
+  pinMode(output32, OUTPUT);
+  pinMode(output25, OUTPUT);
+  pinMode(output13, OUTPUT);
+  pinMode(output21, OUTPUT);
+  pinMode(output19, OUTPUT);
+  pinMode(output16, OUTPUT);
+  pinMode(output17, OUTPUT);
+  pinMode(output18, OUTPUT);
+  pinMode(output14, OUTPUT);
+  pinMode(output22, OUTPUT);
+  // Set outputs to LOW
+  digitalWrite(output23, LOW);
+  digitalWrite(output4, LOW);
+  digitalWrite(output26, LOW);
+  digitalWrite(output27, LOW);
+  digitalWrite(output33, LOW);
+  digitalWrite(output32, LOW);
+  digitalWrite(output25, LOW);
+  digitalWrite(output13, LOW);
+  digitalWrite(output21, LOW);
+  digitalWrite(output19, LOW);
+  digitalWrite(output16, LOW);
+  digitalWrite(output17, LOW);
+  digitalWrite(output18, LOW);
+  digitalWrite(output14, HIGH);
+  digitalWrite(output22, LOW);
+  // Connect to Wi-Fi network with SSID and password
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    digitalWrite(output22, LOW);
+    digitalWrite(output14, HIGH);
+    Serial.println("WiFi Not Connected");
+    delay(1000);
+  }
+#define SERVER_IP "192.168.1.119:7580 // PC address with emulation on host
+  IPAddress ip(192, 168, 1, 119);
+  IPAddress gateway(192, 168, 1, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  WiFi.config(ip, gateway, subnet);
+  delay(2000);
+  // Print local IP address and start web server
+  Serial.println("\n");
+  delay (500);
+  Serial.println("Starting Hodges Web Server...");
+  delay (500);
+  Serial.print("Connected To ");
+  Serial.println(WiFi.SSID());
+  delay (500);
+  Serial.println("Logging into Hodges Web Server.");
+  delay (500);
+  Serial.println("WiFi connected.");
+  delay (500);
+  Serial.print("IP address: -- > ");
+  Serial.print("http://");
+  Serial.println(WiFi.localIP());
+  delay (500);
+  Serial.println("Connected On Port 7580");
+  delay (500);
+  Serial.println("Use the above URL in your Browser to access Hodges Web Server");
+  delay (500);
+  Serial.println("This Server Was Created By James Ferrell Hodges");
+  delay (500);
+  Serial.println("Have Great Day");
+  server.begin();
+}
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+    digitalWrite(output22, HIGH);
+    digitalWrite(output14, LOW);
+  }
+  else {
+    digitalWrite(output22, LOW);
+    digitalWrite(output14, HIGH);
+  }
+  WiFiClient client = server.available();   // Listen for incoming clients
+  if (client) {                             // If a new client connects,
+    currentTime = millis();
+    previousTime = currentTime;
+    Serial.println("New Client.");          // print a message out in the serial port
+    String currentLine = "";                // make a String to hold incoming data from the client
+    while (client.connected() && currentTime - previousTime <= timeoutTime) {  // loop while the client's connected
+      currentTime = millis();
+      if (client.available()) {             // if there's bytes to read from the client,
+        char c = client.read();             // read a byte, then
+        Serial.write(c);                    // print it out the serial monitor
+        header += c;
+        if (c == '\n') {                    // if the byte is a newline character
+          // if the current line is blank, you got two newline characters in a row.
+          // that's the end of the client HTTP request, so send a response:
+          if (currentLine.length() == 0) {
+            // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+            // and a content-type so the client knows what's coming, then a blank line:
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-type:text/html");
+            client.println("Connection: close");
+            client.println();
+
+            // turns the GPIOs on and off
+            if (header.indexOf("GET /4on") >= 0) {
+              Serial.println("GPIO 4 on");
+              output4State = "on";
+              digitalWrite(output4, HIGH);
+              delay(500);
+              Serial.println("GPIO 4 off");
+              output4State = "off";
+              digitalWrite(output4, LOW);
+            } else if (header.indexOf("GET /27on") >= 0) {
+              Serial.println("GPIO 27 on");
+              output27State = "on";
+              digitalWrite(output27, HIGH);
+              delay(500);
+              Serial.println("GPIO 27 off");
+              output27State = "off";
+              digitalWrite(output27, LOW);
+            } else if (header.indexOf("GET /33on") >= 0) {
+              Serial.println("GPIO 33 on");
+              output33State = "on";
+              digitalWrite(output33, HIGH);
+              delay(500);
+              Serial.println("GPIO 33 off");
+              output33State = "off";
+              digitalWrite(output33, LOW);
+            } else if (header.indexOf("GET /23on") >= 0) {
+              Serial.println("GPIO 23 on");
+              output23State = "on";
+              digitalWrite(output23, HIGH);
+              delay(500);
+              Serial.println("GPIO 23 off");
+              output23State = "off";
+              digitalWrite(output23, LOW);
+            }  else if (header.indexOf("GET /26on") >= 0) {
+              Serial.println("GPIO 26 on");
+              output26State = "on";
+              digitalWrite(output26, HIGH);
+            } else if (header.indexOf("GET /26off") >= 0) {
+              Serial.println("GPIO 26 off");
+              output26State = "off";
+              digitalWrite(output26, LOW);
+            } else if (header.indexOf("GET /32on") >= 0) {
+              Serial.println("GPIO 32 on");
+              output32State = "on";
+              digitalWrite(output32, HIGH);
+              delay(500);
+              Serial.println("GPIO 32 off");
+              output32State = "off";
+              digitalWrite(output32, LOW);
+            } else if (header.indexOf("GET /25on") >= 0) {
+              Serial.println("GPIO 25 on");
+              output25State = "on";
+              digitalWrite(output25, HIGH);
+              delay(500);
+              Serial.println("GPIO 25 off");
+              output25State = "off";
+              digitalWrite(output25, LOW);
+            } else if (header.indexOf("GET /13on") >= 0) {
+              Serial.println("GPIO 13 on");
+              output13State = "on";
+              digitalWrite(output13, HIGH);
+              delay(500);
+              Serial.println("GPIO 13 off");
+              output13State = "off";
+              digitalWrite(output13, LOW);
+            } else if (header.indexOf("GET /21on") >= 0) {
+              Serial.println("GPIO 21 on");
+              output21State = "on";
+              digitalWrite(output21, HIGH);
+              delay(500);
+              Serial.println("GPIO 21 off");
+              output21State = "off";
+              digitalWrite(output21, LOW);
+            } else if (header.indexOf("GET /19on") >= 0) {
+              Serial.println("GPIO 19 on");
+              output19State = "on";
+              digitalWrite(output19, HIGH);
+              delay(500);
+              Serial.println("GPIO 19 off");
+              output19State = "off";
+              digitalWrite(output19, LOW);
+            } else if (header.indexOf("GET /16on") >= 0) {
+              Serial.println("GPIO 16 on");
+              output16State = "on";
+              digitalWrite(output16, HIGH);
+              delay(500);
+              Serial.println("GPIO 16 off");
+              output16State = "off";
+              digitalWrite(output16, LOW);
+            } else if (header.indexOf("GET /17on") >= 0) {
+              Serial.println("GPIO 17 on");
+              output17State = "on";
+              digitalWrite(output17, HIGH);
+              delay(500);
+              Serial.println("GPIO 17 off");
+              output17State = "off";
+              digitalWrite(output17, LOW);
+            } else if (header.indexOf("GET /18on") >= 0) {
+              Serial.println("GPIO 18 on");
+              output18State = "on";
+              digitalWrite(output18, HIGH);
+              delay(500);
+              Serial.println("GPIO 18 off");
+              output18State = "off";
+              digitalWrite(output18, LOW);
+            }
+            // Display the HTML web page
+            client.println("<!DOCTYPE html><html>");
+            client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+            client.println("<link rel=\"icon\" href=\"data:,\">");
+            // CSS to style the on/off buttons
+            // Feel free to change the background-color and font-size attributes to fit your preferences
+            client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
+            client.println(".button { background-color: #4CAF50;  color: white; padding: 16px 40px;");
+            client.println("text-decoration: none; font-size: 30px; margin: 10px;border-radius: 50%; box-shadow: 0 9px #999; cursor: pointer;}");
+            client.println(".button:hover {background-color: #3e8e41;}");
+            client.println(".button:active { background-color: #3e8e41; box-shadow: 0 5px #666; transform: translateY(4px);}");
+            client.println(".button1 {background-color: #13B3F0;}"); //LIGHT BLUE
+            client.println(".button2 {background-color: #3342FF;}"); //DARK BLUE
+            client.println(".button3 {background-color: #4CAF50;}"); //LIGHT GREEN
+            client.println(".button4 {background-color: #555555;}"); //BLACK
+            client.println(".button5 {background-color: #E42C6A;}"); //PINKISH RED
+            client.println(".button6 {background-color: #F4ABAA;}"); //PINK
+            client.println(".button7 {background-color: #292930;}"); //BLACK
+            client.println(".button8 {background-color: #EE7879;}"); //LIGHT PINK
+            client.println(".button9 {background-color: #E56B1F;}"); //ORANGEISH
+            client.println(".button10 {background-color: #32064A;}"); //PURPLE
+            client.println(".button11 {background-color: #E12B38;}"); //RED
+            client.println(".button12 {background-color: #893F04;}"); //RUSTY
+            client.println(".button13 {background-color: #80471C;}"); //Tawny Brown
+            client.println(".button14 {background-color: #481F01;}"); //Syrup
+            client.println(".button15 {background-color: #FCD02C;}"); //YELLOWISH
+            client.println(".button16 {background-color: #FCC133;}"); //YELLOW
+            client.println(".button17 {background-color: #28559A;}"); //DARKBLUE
+            client.println(".button18 {background-color: #3778C2;}"); //LIGHTBLUE
+            client.println(".button19 {background-color: #350d06;}"); //DARKBROWN
+            client.println(".button20 {background-color: #e6a964;}"); //LIGHTBROWN
+            client.println(".button21 {background-color: #404518;}"); //DARKGREEN
+            client.println(".button22 {background-color: #B2BA97;}"); //LIGHTGREEN
+            client.println(".button23 {background-color: #CAE7DF;}"); //PALEGREEN
+            client.println(".button24 {background-color: #404518;}"); //OLIVEGREEN
+            client.println(".button25 {background-color: #7B876D;}"); //DARKPALEGREEN
+            client.println(".button26 {background-color: #EDDCD2;}"); //LIGHT LIGHT PINK
+            client.println("</style>");
+            client.println("</head>");
+
+            // Web Page Heading
+            client.println("<body><h1>Hodges Web Server<h1>");
+
+            // Display current state, and ON/OFF buttons for GPIO 4
+            client.println("<p>THE GARAGE DOOR</p>");
+            // If the output4State is off, it displays the ON button
+            if (output4State == "off") {
+              client.println("<p><a href=\"/4on\"><button class=\"button button1\">Garage Door Up/Down</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/4off\"><button class=\"button button3\">Garage Door Up/Down</button></a></p>");
+            }
+            // Display current state, and ON/OFF buttons for GPIO 33
+            client.println("<p>BOX FAN</p>");
+            // If the output33State is off, it displays the ON button
+            if (output33State == "off") {
+              client.println("<p><a href=\"/33on\"><button class=\"button button17\">Box Fan ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/33off\"><button class=\"button button3\">Box Fan ON/OFF</button></a></p>");
+            }
+            // Display current state, and ON/OFF buttons for GPIO 23
+            client.println("<p>END TABLE LAMP</p>");
+            // If the output23State is off, it displays the ON button
+            if (output23State == "off") {
+              client.println("<p><a href=\"/23on\"><button class=\"button button11\">End Table ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/23off\"><button class=\"button button3\">End Table ON/OFF</button></a></p>");
+            }
+            client.println("<p>FRONT ENTRY LAMP</p>");
+            // If the output27State is off, it displays the ON button
+            if (output27State == "off") {
+              client.println("<p><a href=\"/27on\"><button class=\"button button10\">Front Entry Lamp ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/27off\"><button class=\"button button3\">Front Entry Lamp ON/OFF</button></a></p>");
+            }
+            client.println("<p>DESK LAMP " + output26State + "</p>");
+            // If the output26State is off, it displays the ON button
+            if (output26State == "off") {
+              client.println("<p><a href=\"/26on\"><button class=\"button button12\">Desk Lamp OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/26off\"><button class=\"button button3\">Desk Lamp ON</button></a></p>");
+            }
+            // Display current state, and ON/OFF buttons for GPIO 32
+            client.println("<p>MOMS LAMP 1</p>");
+            // If the output32State is off, it displays the ON button
+            if (output32State == "off") {
+              client.println("<p><a href=\"/32on\"><button class=\"button button15\">Moms Lamp 1 ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/32off\"><button class=\"button button3\">Moms Lamp 1 ON/OFF</button></a></p>");
+            }
+            // Display current state, and ON/OFF buttons for GPIO 25
+            client.println("<p>MOMS LAMP 2</p>");
+            // If the output25State is off, it displays the ON button
+            if (output25State == "off") {
+              client.println("<p><a href=\"/25on\"><button class=\"button button6\">Moms Lamp 2 ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/25off\"><button class=\"button button3\">Moms Lamp 2 ON/OFF</button></a></p>");
+            }
+            // Display current state, and ON/OFF buttons for GPIO 13
+            client.println("<p>My Headboard Lamp</p>");
+            // If the output13State is off, it displays the ON button
+            if (output13State == "off") {
+              client.println("<p><a href=\"/13on\"><button class=\"button button14\">My Lamp ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/13off\"><button class=\"button button3\">My Lamp ON/OFF</button></a></p>");
+            }
+            client.println("<p>Lynne's Headboard Lamp</p>");
+            // If the output21State is off, it displays the ON button
+            if (output21State == "off") {
+              client.println("<p><a href=\"/21on\"><button class=\"button button9\">Lynne's Lamp ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/21off\"><button class=\"button button3\">Lynne's Lamp ON/OFF</button></a></p>");
+            }
+            client.println("<p>VOICE</p>");
+            // If the output19State is off, it displays the ON button
+            if (output19State == "off") {
+              client.println("<p><a href=\"/19on\"><button class=\"button button11\">VOICE ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/19off\"><button class=\"button button3\">VOICE ON/OFF</button></a></p>");
+            }
+            client.println("<p>EXTRA 1</p>");
+            // If the output16State is off, it displays the ON button
+            if (output16State == "off") {
+              client.println("<p><a href=\"/16on\"><button class=\"button button18\">EXTRA 1 ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/16off\"><button class=\"button button3\">EXTRA 1 ON/OFF</button></a></p>");
+            }
+            client.println("<p>EXTRA 2</p>");
+            // If the output17State is off, it displays the ON button
+            if (output17State == "off") {
+              client.println("<p><a href=\"/17on\"><button class=\"button button20\">EXTRA 2 ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/17off\"><button class=\"button button3\">EXTRA 2 ON/OFF</button></a></p>");
+            }
+            client.println("<p>EXTRA 3</p>");
+            // If the output18State is off, it displays the ON button
+            if (output18State == "off") {
+              client.println("<p><a href=\"/18on\"><button class=\"button button25\">EXTRA 3 ON/OFF</button></a></p>");
+            } else {
+              client.println("<p><a href=\"/18off\"><button class=\"button button3\">EXTRA 3 ON/OFF</button></a></p>");
+            }
+            client.println("</body></html>");
+            // The HTTP response ends with another blank line
+            client.println();
+            // Break out of the while loop
+            break;
+          } else { // if you got a newline, then clear currentLine
+            currentLine = "";
+          }
+        } else if (c != '\r') {  // if you got anything else but a carriage return character,
+          currentLine += c;      // add it to the end of the currentLine
+        }
+      }
+    }
+    // Clear the header variable
+    header = "";
+    // Close the connection
+    client.stop();
+    Serial.println("Client disconnected.");
+    Serial.println("");
+  }
+}

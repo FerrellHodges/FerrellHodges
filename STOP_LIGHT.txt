@@ -1,0 +1,38 @@
+#include <Arduino.h>
+#include <Ticker.h>
+
+#define LED_BUILTIN 2 // define the YELLOW LED GPIO 2 as LED_BUILTIN
+#define LED_BUILTOUT 4 // define the RED LED GPIO 4 as LED_BUILTOUT
+#define LED_BUILTOR 5 // define the GREEN LED GPIO 5 as LED_BUILTOR
+#define LED_CAUL 16   // define the 2nd YELLOW LED GPIO 16 as LED_CAUL
+#define LED_STOP 17 // define the 2nd RED LED GPIO 17 as LED_STOP
+#define LED_GO 15 // define the 2nd GREEN LED GPIO 15 LED_GO
+
+void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);  // initialize GPIO pin 2 LED_BUILTIN as an output YELLOW.
+  pinMode(LED_BUILTOUT, OUTPUT);  // initialize GPIO pin 4 LED_BUILTOUT as an output RED.
+  pinMode(LED_BUILTOR, OUTPUT);  // initialize GPIO pin 5 LED_BUILTOUT as an output GREEN.
+  pinMode(LED_CAUL, OUTPUT); // initalize GPIO pin 16 LED_BUILTOUTT as an output YELLOW
+  pinMode(LED_STOP, OUTPUT); // initalize GPIO pin 17 LED_BUILTINN as an output RED.
+  pinMode(LED_GO, OUTPUT); // initalize GPIO pin 15 LED_BUILTORR as an output GREEN.
+  }
+void loop() {
+  digitalWrite(LED_BUILTOR, HIGH);  // turn the GREEN LED on
+  delay(30000);                     // wait for a second
+  digitalWrite(LED_BUILTOR, LOW);   // turn the GREEN LED off
+  digitalWrite(LED_BUILTIN, HIGH); // turn the YELLOW LED on
+  delay(5000);                      // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);   // turn the YELLOW LED off
+  digitalWrite(LED_BUILTOUT, HIGH);  // turn the RED LED on
+  delay(500);
+  digitalWrite(LED_STOP, LOW);   // turn 2nd red off
+  digitalWrite(LED_GO, HIGH);   // turn on 2nd green light
+  delay(30000);                       // wait for a second
+  digitalWrite(LED_GO, LOW); //turn 2nd green off
+  digitalWrite(LED_CAUL, HIGH);  //turn 2nd yellow on
+  delay(5000);
+  digitalWrite(LED_CAUL, LOW); //turn 2nd yellow off
+  digitalWrite(LED_STOP, HIGH);  //turn 2nd red on
+  delay(500);
+  digitalWrite(LED_BUILTOUT, LOW);   // turn the RED LED off
+     }
